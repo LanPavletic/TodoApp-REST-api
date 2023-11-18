@@ -1,11 +1,12 @@
 ### REST server written in go
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/LanPavletic/go-rest-server)](https://goreportcard.com/report/github.com/LanPavletic/go-rest-server)
+
 ## Table of Contents
 
 - [Overview](#overview)
 - [Built With](#built-with)
 - [Features](#features)
-- [Contact](#contact)
 
 ## Overview
 REST server API, built using Go and Gin, facilitates task management by connecting to MongoDB for efficient data storage. Has a robust authentication system based on JWT.
