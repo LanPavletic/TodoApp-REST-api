@@ -14,7 +14,7 @@ func NotFound(c *gin.Context) {
 }
 
 func BadRequest(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 }
 
 func InternalServerError(c *gin.Context) {

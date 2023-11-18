@@ -2,6 +2,8 @@ package stores
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,6 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var ErrUserAlreadyExists = errors.New("user already exists")
 
 type User struct {
 	Username     string `json:"username"`
@@ -70,13 +74,34 @@ func (us *UserStore) Login(uc *UserCredentials) (string, error) {
 }
 
 func (us *UserStore) Create(uc *UserCredentials) (primitive.ObjectID, error) {
-	// hash password
+	// check if user exists
+	var user *User
+	filter := bson.D{{Key: "username", Value: uc.Username}}
+	err := us.Collection.FindOne(context.Background(), filter).Decode(&User{})
+
+	// If we get and error and its not because the user doesn't exist, return the error
+	if err != nil && err != mongo.ErrNoDocuments {
+		return primitive.NilObjectID, err
+	}
+
+	// If the user exists, return an error
+	if err == nil {
+		return primitive.NilObjectID, ErrUserAlreadyExists
+	}
+
+	fmt.Println(err)
+
+	if err != nil {
+		panic(err)
+	}
+
+	// hash and salt the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(uc.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
 
-	user := &User{
+	user = &User{
 		Username:     uc.Username,
 		PasswordHash: hash,
 	}

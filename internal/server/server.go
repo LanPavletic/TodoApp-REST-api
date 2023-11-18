@@ -81,6 +81,7 @@ func (s *Server) HandleGetAllTasks(c *gin.Context) {
 	tasks, err := s.store.GetAll()
 	if err != nil {
 		responds.InternalServerError(c)
+		return
 	}
 	c.JSON(http.StatusOK, tasks)
 }
@@ -101,7 +102,10 @@ func (s *Server) HandleCreateTask(c *gin.Context) {
 // Handler for /task/:id GET request
 func (s *Server) HandleGetTask(c *gin.Context) {
 	// parse id parameter from POST request
-	id := ParseId(c)
+	id, err := ParseId(c)
+	if err != nil {
+		responds.BadRequest(c)
+	}
 
 	fmt.Println(id)
 	// get task from store
@@ -115,11 +119,15 @@ func (s *Server) HandleGetTask(c *gin.Context) {
 
 // Handler for /task/:id DELETE request
 func (s *Server) HandleDeleteTask(c *gin.Context) {
-	id := ParseId(c)
-
-	err := s.store.Delete(id)
+	id, err := ParseId(c)
+	if err != nil {
+		responds.BadRequest(c)
+		return
+	}
+	err = s.store.Delete(id)
 	if err != nil {
 		responds.NotFound(c)
+		return
 	}
 	c.JSON(http.StatusNoContent, nil)
 }
@@ -130,14 +138,15 @@ func (s *Server) HandleUpdateTask(c *gin.Context) {
 	c.BindJSON(&requestedTask)
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-
 		responds.BadRequest(c)
+		return
 	}
 
 	// update task in store
 	err = s.store.Update(id, &requestedTask)
 	if err != nil {
 		responds.NotFound(c)
+		return
 	}
 
 	// respond with no content
@@ -151,7 +160,12 @@ func (s *Server) HandleRegister(c *gin.Context) {
 
 	id, err := s.userStore.Create(&userCredentials)
 	if err != nil {
+		if err == stores.ErrUserAlreadyExists {
+			responds.BadRequest(c)
+			return
+		}
 		responds.InternalServerError(c)
+		return
 	}
 	c.JSON(http.StatusCreated, struct{ primitive.ObjectID }{id})
 }
@@ -163,16 +177,21 @@ func (s *Server) HandleLogin(c *gin.Context) {
 
 	token, err := s.userStore.Login(&userCredentials)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			responds.BadRequest(c)
+			return
+		}
 		responds.Unauthorized(c)
+		return
 	}
 	c.JSON(http.StatusOK, struct{ Token string }{token})
 }
 
 // ParseId takes id from request url and parses it to primitive.ObjectID
-func ParseId(c *gin.Context) primitive.ObjectID {
+func ParseId(c *gin.Context) (primitive.ObjectID, error) {
 	ParsedId, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		responds.BadRequest(c)
+		return primitive.NilObjectID, err
 	}
-	return ParsedId
+	return ParsedId, nil
 }
