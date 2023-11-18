@@ -1,16 +1,31 @@
 ### REST server written in go
-Made for a simple task managing app
 
-## TODO
-[x] POST   /task/              :  create a task, returns ID
-[x] GET    /task/<taskid>      :  returns a single task by ID
-[x] GET    /task/              :  returns all tasks
-[x] DELETE /task/<taskid>      :  delete a task by ID
-[] GET     /tag/<tagname>      :  returns list of tasks with this tag
-[] GET     /due/<yy>/<mm>/<dd> :  returns list of tasks due by this date
-[x] POST   /login/             : verifes user and returns a new JWT token
-[x] POST   /register/          : creates a new account
+## Table of Contents
 
-[x] TLS connection
-[x] JWT implementation
-[x] MongoDB
+- [Overview](#overview)
+- [Built With](#built-with)
+- [Features](#features)
+- [Contact](#contact)
+
+## Overview
+REST server API, built using Go and Gin, facilitates task management by connecting to MongoDB for efficient data storage. Has a robust authentication system based on JWT.
+This project was made with the purpose of learning production level authetication and deployment of Rest api-s.
+
+
+### Built With
+[Gin Web Framework](https://gin-gonic.com): a web framework written in Golang.
+
+[Mongodb](https://www.mongodb.com/): Robust and easy to use database for storing all our data.
+
+[JWT](https://jwt.io/): A industry standard for securely transmitting information between parties
+
+## Features
+The api has end points for both registering and logging in users. The register handler salts and hashed passwords before storing them in the users collection.
+The login route verifes the users credetials and returns a JWT token that lasts for an hour. 
+The api also servers protected endpoints that require a valid JWT token.
+
+The protected routes can:
+ - Create new tasks
+ - Get a specific task via Id
+ - Update or delete tasks
+ - get all tasks
