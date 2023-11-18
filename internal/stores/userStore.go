@@ -2,11 +2,8 @@ package stores
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"time"
 
-	"github.com/LanPavletic/go-rest-server/internal/responds"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
